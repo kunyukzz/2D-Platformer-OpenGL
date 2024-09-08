@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../graphics/sprite.h"
+#include "sprite.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 
