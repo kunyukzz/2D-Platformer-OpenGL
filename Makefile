@@ -2,7 +2,7 @@
 CXX := g++
 
 # Compiler flags
-CXXFLAGS := -std=c++17 -Wall -m64 -g
+CXXFLAGS := -std=c++17 -Wall -m64 -g -I./my_engine
 
 # Linker flags
 LDFLAGS := -s
@@ -14,9 +14,12 @@ OBJ_DIR := obj
 BIN_DIR := bin/debug
 
 # Source and object files
-#SRC := $(wildcard $(SRC_DIR)/*.cpp)
 SRC := $(shell find $(SRC_DIR) -name '*.cpp')
 OBJ := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
+
+# Engine source and object files
+ENGINE_SRC := $(shell find my_engine -name '*.cpp')
+ENGINE_OBJ := $(patsubst my_engine/%.cpp,$(OBJ_DIR)/my_engine/%.o,$(ENGINE_SRC))
 
 # Target executable
 TARGET := $(BIN_DIR)/main
@@ -25,11 +28,16 @@ TARGET := $(BIN_DIR)/main
 all: $(TARGET)
 
 # Linking
-$(TARGET): $(OBJ) | $(BIN_DIR)
-	$(CXX) $(OBJ) -o $@ $(LDFLAGS) $(LIBS)
+$(TARGET): $(OBJ) $(ENGINE_OBJ) | $(BIN_DIR)
+	$(CXX) $(OBJ) $(ENGINE_OBJ) -o $@ $(LDFLAGS) $(LIBS)
 
 # Compilation
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	@mkdir -p $(dir $@)  # Create subdirectories in obj/ as needed
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Compilation of engine source files
+$(OBJ_DIR)/my_engine/%.o: my_engine/%.cpp | $(OBJ_DIR)/my_engine
 	@mkdir -p $(dir $@)  # Create subdirectories in obj/ as needed
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -39,6 +47,9 @@ $(BIN_DIR):
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
+
+$(OBJ_DIR)/my_engine:
+	mkdir -p $(OBJ_DIR)/my_engine
 
 # Clean up
 clean:
