@@ -1,3 +1,4 @@
 # Exclude build directories and files
 bin/
 obj/
+assets/
