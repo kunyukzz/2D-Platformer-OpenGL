@@ -1,4 +1,6 @@
 #include "sprite.h"
+#include "vertex.h"
+#include <cstddef>
 
 Sprite::Sprite() {}
 
@@ -18,36 +20,38 @@ void Sprite::init(float x, float y, float w, float h)
     if (m_vboID == 0)
         glGenBuffers(1, &m_vboID);
 
-    float vData[12]; // vertex total count * 2(bcz 2 dimension, x and y)
+    Vertex vData[6]; // vertex total count * 2(bcz 2 dimension, x and y)
 
     // ----------------------- THIS BELOW WAS PARAMETER VERTEX POSITION---------------------------------
     // ----------------------------- IT HAS 2 TRIANGLES COMBINE-----------------------------------------
 
     // FIRST TRIANGLE
-    // vertex top-right corner
-    vData[0] = x + w;
-    vData[1] = y + h;
-
-    // vertex top-left corner
-    vData[2] = x;
-    vData[3] = y + h;
-
-    // vertex bottom-left corner
-    vData[4] = x;
-    vData[5] = y;
+    vData[0].setPos(x + w, y + h); // vertex top-right corner
+    vData[0].setUV(1.0f, 1.0f);
+    vData[1].setPos(x, y + h); // vertex top-left corner
+    vData[1].setUV(0.0f, 1.0f);
+    vData[2].setPos(x, y); // vertex bottom-left corner
+    vData[2].setUV(0.0f, 0.0f);
 
     // SECOND TRIANGLE
-    // vertex bottom-left corner
-    vData[6] = x;
-    vData[7] = y;
+    vData[3].setPos(x, y); // vertex bottom-left corner
+    vData[3].setUV(0.0f, 0.0f);
+    vData[4].setPos(x + w, y); // vertex bottom-right corner
+    vData[4].setUV(1.0f, 0.0f);
+    vData[5].setPos(x + w, y + h); // vertex top-right corner
+    vData[5].setUV(1.0f, 1.0f);
 
-    // vertex bottom-right corner
-    vData[8] = x + w;
-    vData[9] = y;
+    // give color per vertex
+    for (int i = 0; i < 6; i++)
+    {
+        vData[i].setColor(255, 0, 255, 255); // base color for all vertex
+    }
 
-    // vertex top-right corner
-    vData[10] = x + w;
-    vData[11] = y + h;
+    // top left corner
+    vData[1].setColor(200, 0, 105, 255);
+
+    // bottom right color
+    vData[4].setColor(255, 255, 0, 255);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vData), vData, GL_STATIC_DRAW);
@@ -57,10 +61,19 @@ void Sprite::init(float x, float y, float w, float h)
 
 void Sprite::draw()
 {
+    // bind buffer object
     glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
+
+    // tell openGL to use first attribute array
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    // this is position attribute color
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    // this is color attribute pointer
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    // this is uv attribute pointer
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisableVertexAttribArray(0);
