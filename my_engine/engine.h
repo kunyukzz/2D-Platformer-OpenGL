@@ -1,8 +1,12 @@
 #pragma once
 
+#include "glslprog.h"
 #include "sprite.h"
+#include "window.h"
 #include <SDL2/SDL.h>
-#include <iostream>
+#include <vector>
+#include "camera2d.h"
+#include "spritebatch.h"
 
 enum class EngineState
 {
@@ -12,19 +16,28 @@ enum class EngineState
 
 class Engine
 {
-    SDL_Window* m_window;
-    // SDL_Renderer* m_renderer;
-    int m_scHgt;
+    Window m_window;
     int m_scWdt;
+    int m_scHgt;
 
     EngineState m_EState;
 
     void init();
+    void initShader();
     void update();
     void input();
     void draw();
+    void calcFPS();
 
-    Sprite m_sprite;
+    GLSLProgram m_shaderTest;
+    Camera2D m_camera;
+
+    SpriteBatch m_spriteBatch;
+
+    float m_FPS;
+    float m_maxFPS;
+    float m_frameTime;
+    float m_time;
 
   public:
     Engine();

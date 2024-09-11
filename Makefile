@@ -6,7 +6,7 @@ CXXFLAGS := -std=c++17 -Wall -m64 -g -I./my_engine
 
 # Linker flags
 LDFLAGS := -s
-LIBS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lGL -lGLEW -lglfw
+LIBS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lGL -lGLEW -lglfw -lglm
 
 # Directories
 SRC_DIR := src

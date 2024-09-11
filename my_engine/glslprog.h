@@ -20,7 +20,7 @@ class GLSLProgram
     void linkShader();
     void addAttr(const std::string& attrName);
 
-    GLuint getUniformLoc(const std::string& uniformName);
+    GLint getUniformLoc(const std::string& uniformName);
 
     void use();
     void unused();
