@@ -8,7 +8,8 @@ enum WindowFlags
 {
     INVINSIBLE = 0x1,
     FULLSCREEN = 0x2,
-    BORDERLESS = 0x4
+    BORDERLESS = 0x4,
+    DEFAULT = 0x8
 };
 
 class Window

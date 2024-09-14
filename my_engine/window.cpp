@@ -14,6 +14,8 @@ int Window::create(std::string windowName, int scrWidth, int scrHeight, unsigned
         flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     if (currentFlags & BORDERLESS)
         flags |= SDL_WINDOW_BORDERLESS;
+    if (currentFlags & DEFAULT)
+        flags |= SDL_WINDOW_OPENGL;
 
     // set SDL to a double buffer window so screen dont get any flickering
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -34,6 +36,9 @@ int Window::create(std::string windowName, int scrWidth, int scrHeight, unsigned
     std::printf("*** OpenGL Version: %s ***", glGetString(GL_VERSION));
 
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // color background
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return 0;
 }

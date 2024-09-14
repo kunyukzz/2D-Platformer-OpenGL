@@ -19,6 +19,10 @@ class Camera2D
     void init(int scWidth, int scHeight);
     void update();
 
+    glm::vec2 convScreenToWorld(glm::vec2 screenCoord);
+
+    bool isBoxInsideView(const glm::vec2& position, const glm::vec2& dimension);
+
     void setPosition(const glm::vec2& newPosition)
     {
         m_position = newPosition;

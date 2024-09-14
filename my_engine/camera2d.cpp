@@ -33,3 +33,20 @@ void Camera2D::update()
         m_needUpdateMatrix = false;
     }
 }
+
+glm::vec2 Camera2D::convScreenToWorld(glm::vec2 screenCoord)
+{
+    // invert Y direction
+    screenCoord.y = m_scH - screenCoord.y;
+
+    // make zero coordinate to center of screen
+    screenCoord += glm::vec2(m_scW / 2, m_scH / 2);
+
+    // scale coordinate
+    screenCoord /= m_scale;
+
+    // translate with camera position
+    screenCoord += m_position;
+    return screenCoord;
+}
+

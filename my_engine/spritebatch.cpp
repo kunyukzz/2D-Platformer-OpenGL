@@ -3,46 +3,46 @@
 
 SpriteBatch::SpriteBatch()
     : m_vbo(0)
-    , m_vao(0) {};
+    , m_vao(0){};
 
 SpriteBatch::~SpriteBatch() {}
 
 void SpriteBatch::createRenderBatch()
 {
     std::vector<Vertex> vertices;
-    vertices.resize(m_glyph.size() * 6);
+    vertices.resize(m_glyphPointer.size() * 6);
 
-    if (m_glyph.empty())
+    if (m_glyphPointer.empty())
         return;
 
     int offset = 0;
     int cV = 0; // current vertex
-    m_renderBatch.emplace_back(0, 6, m_glyph[0]->texture);
-    vertices[cV++] = m_glyph[0]->topLeft;
-    vertices[cV++] = m_glyph[0]->bottomLeft;
-    vertices[cV++] = m_glyph[0]->bottomRight;
-    vertices[cV++] = m_glyph[0]->bottomRight;
-    vertices[cV++] = m_glyph[0]->topRight;
-    vertices[cV++] = m_glyph[0]->topLeft;
+    m_renderBatch.emplace_back(offset, 6, m_glyphPointer[0]->texture);
+    vertices[cV++] = m_glyphPointer[0]->topLeft;
+    vertices[cV++] = m_glyphPointer[0]->bottomLeft;
+    vertices[cV++] = m_glyphPointer[0]->bottomRight;
+    vertices[cV++] = m_glyphPointer[0]->bottomRight;
+    vertices[cV++] = m_glyphPointer[0]->topRight;
+    vertices[cV++] = m_glyphPointer[0]->topLeft;
     offset += 6;
 
     // loop inside current glyphs
-    for (int cg = 1; cg < m_glyph.size(); cg++)
+    for (unsigned int cg = 1; cg < m_glyphPointer.size(); cg++)
     {
-        if (m_glyph[cg]->texture != m_glyph[cg - 1]->texture)
+        if (m_glyphPointer[cg]->texture != m_glyphPointer[cg - 1]->texture)
         {
-            m_renderBatch.emplace_back(offset, 6, m_glyph[cg]->texture);
+            m_renderBatch.emplace_back(offset, 6, m_glyphPointer[cg]->texture);
         }
         else
         {
             m_renderBatch.back().numVertices += 6;
         }
-        vertices[cV++] = m_glyph[cg]->topLeft;
-        vertices[cV++] = m_glyph[cg]->bottomLeft;
-        vertices[cV++] = m_glyph[cg]->bottomRight;
-        vertices[cV++] = m_glyph[cg]->bottomRight;
-        vertices[cV++] = m_glyph[cg]->topRight;
-        vertices[cV++] = m_glyph[cg]->topLeft;
+        vertices[cV++] = m_glyphPointer[cg]->topLeft;
+        vertices[cV++] = m_glyphPointer[cg]->bottomLeft;
+        vertices[cV++] = m_glyphPointer[cg]->bottomRight;
+        vertices[cV++] = m_glyphPointer[cg]->bottomRight;
+        vertices[cV++] = m_glyphPointer[cg]->topRight;
+        vertices[cV++] = m_glyphPointer[cg]->topLeft;
         offset += 6;
     }
 
@@ -86,13 +86,16 @@ void SpriteBatch::sortGlyphs()
     switch (m_sortType)
     {
     case GlyphSortType::BACK_TO_FRONT:
-        std::stable_sort(m_glyph.begin(), m_glyph.end(), compareBackToFront);
+        std::stable_sort(m_glyphPointer.begin(), m_glyphPointer.end(), compareBackToFront);
         break;
     case GlyphSortType::FRONT_TO_BACK:
-        std::stable_sort(m_glyph.begin(), m_glyph.end(), compareFrontToBack);
+        std::stable_sort(m_glyphPointer.begin(), m_glyphPointer.end(), compareFrontToBack);
         break;
     case GlyphSortType::TEXTURE:
-        std::stable_sort(m_glyph.begin(), m_glyph.end(), compareTexture);
+        std::stable_sort(m_glyphPointer.begin(), m_glyphPointer.end(), compareTexture);
+        break;
+    case GlyphSortType::NONE:
+        std::stable_sort(m_glyphPointer.begin(), m_glyphPointer.end(), compareTexture);
         break;
     }
 }
@@ -120,53 +123,31 @@ void SpriteBatch::begin(GlyphSortType sortType)
 {
     m_sortType = sortType;
     m_renderBatch.clear();
-
-    for (int i = 0; i < m_glyph.size(); i++)
-    {
-        delete m_glyph[i];
-    }
     m_glyph.clear();
 }
 
 void SpriteBatch::end()
 {
+    m_glyphPointer.resize(m_glyph.size());
+    for (unsigned int i = 0; i < m_glyph.size(); i++)
+    {
+        m_glyphPointer[i] = &m_glyph[i];
+    }
+
     sortGlyphs();
     createRenderBatch();
 }
 
-void SpriteBatch::draw(const glm::vec4& desRect, const glm::vec4& uvRect, GLuint texture, float depth, Color& color)
+void SpriteBatch::draw(const glm::vec4& desRect, const glm::vec4& uvRect, GLuint texture, float depth, const Color& color)
 {
-    Glyph* newGlyph = new Glyph;
-    newGlyph->texture = texture;
-    newGlyph->depth = depth;
-
-    // top left vertex
-    newGlyph->topLeft.color = color;
-    newGlyph->topLeft.setPos(desRect.x, desRect.y + desRect.w);
-    newGlyph->topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
-
-    // bottom left vertex
-    newGlyph->bottomLeft.color = color;
-    newGlyph->bottomLeft.setPos(desRect.x, desRect.y);
-    newGlyph->bottomLeft.setUV(uvRect.x, uvRect.y);
-
-    // top right vertex
-    newGlyph->topRight.color = color;
-    newGlyph->topRight.setPos(desRect.x + desRect.z, desRect.y);
-    newGlyph->topRight.setUV(uvRect.x + uvRect.z, uvRect.y);
-
-    // bottom right vertex
-    newGlyph->bottomRight.color = color;
-    newGlyph->bottomRight.setPos(desRect.x + desRect.z, desRect.y + desRect.w);
-    newGlyph->bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
-
-    m_glyph.push_back(newGlyph);
+    m_glyph.emplace_back(desRect, uvRect, texture, depth, color);
 }
 void SpriteBatch::renderBatch()
 {
+    glDisable(GL_CULL_FACE);
     glBindVertexArray(m_vao);
 
-    for (int i = 0; i < m_renderBatch.size(); i++)
+    for (uint i = 0; i < m_renderBatch.size(); i++)
     {
         glBindTexture(GL_TEXTURE_2D, m_renderBatch[i].texture);
         glDrawArrays(GL_TRIANGLES, m_renderBatch[i].offset, m_renderBatch[i].numVertices);
